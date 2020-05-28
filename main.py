@@ -12,7 +12,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
 
-def click_button_by_label(label:str,max_wait =10,show=False,element_type:str="*"):
+def click_button_by_label(label:str,max_wait =10,show=True,element_type:str="*"):
     driver.implicitly_wait(10)
     def _by_xpath() -> webdriver.remote.webelement.WebElement:
         driver.implicitly_wait(10)
@@ -25,31 +25,32 @@ def click_button_by_label(label:str,max_wait =10,show=False,element_type:str="*"
     current_wait_time_for_element_ready = 0
     while 1:
         try:
-            print(f"try click: {label}: {button.text}")
+            print(f"try: click: {label}: {button.text}")
             button.click()
+            print(f"OK: click!")
             #time.sleep(10)
             break
         except ElementClickInterceptedException:
             button = button.find_element_by_xpath("./..")
-            print(f"go to parent element:{button.text}")
+            print(f"W: go to parent element:{button.text}")
 
         except ElementNotInteractableException as e: # js of element not ready
             #print(driver.page_source)
             current_wait_time_for_element_ready += 1
-            print(f"waited for {current_wait_time_for_element_ready},current element: {button.text}, try to find: {label} ")
+            print(f"W: waited for {current_wait_time_for_element_ready},current element: {button.text}, try to find: {label} ")
             time.sleep(1)
             assert current_wait_time_for_element_ready <= max_wait, f"timeout: {e}"
             button = _by_xpath()
             button = button[0]
 
         except StaleElementReferenceException as e: #element is not attached to the page document
-            print("element not ready! wait")
+            print("W: element not ready! wait")
             time.sleep(1)
             button = _by_xpath()
             button = button[0]
 
 
-def find_xpath_key_input(xpath, content, try_option=False):
+def find_css_key_input(xpath, content, try_option=False):
     driver.implicitly_wait(2)
 
     if try_option:
@@ -63,6 +64,13 @@ def find_xpath_key_input(xpath, content, try_option=False):
         field.send_keys(content)
 
 
+def check_element_exist_by_label(label: str, element_type:str='*')->bool:
+    try:
+        field = driver.find_elements_by_xpath(f"//{element_type}[text()='{label}']")
+        print(f"OK: {label} exist!")
+        return True
+    except:
+        return False
 
 
 
@@ -101,40 +109,37 @@ driver.implicitly_wait(10)
 
 
 username, password = "0910365567", "!gavin840511"
-find_xpath_key_input(xpath="input[type='text']",content=username,try_option=True)
-find_xpath_key_input(xpath="input[type='email']",content=username,try_option=True)
-find_xpath_key_input(xpath="input[type='password']",content=password)
+find_css_key_input(xpath="input[type='text']",content=username,try_option=True)
+find_css_key_input(xpath="input[type='email']",content=username,try_option=True)
+find_css_key_input(xpath="input[type='password']",content=password)
 driver.implicitly_wait(2)
 
 #button= driver.find_elements_by_xpath("//*[contains(text(), '登入')]") or driver.find_elements_by_xpath("//*[contains(text(), 'Log In')]")
 ActionChains(driver).key_down(Keys.ENTER).key_up(Keys.ENTER).perform()
 driver.implicitly_wait(30)
 
-
-
-
+assert check_element_exist_by_label(label="建立貼文") and check_element_exist_by_label(label="平行城市")
 
 click_button_by_label(label='平行城市')
 driver.implicitly_wait(10)
-print(driver.title)
+
+assert check_element_exist_by_label(label="發佈工具")
 
 click_button_by_label(label='發佈工具')
 driver.implicitly_wait(10)
-print(driver.title)
+assert check_element_exist_by_label(label="觸及人數")
 
-click_button_by_label(label='建立貼文', show=True)
+click_button_by_label(label='建立貼文')
 driver.implicitly_wait(10)
-print(driver.title)
 
 
-
+assert check_element_exist_by_label(label="接收訊息")
 field = driver.find_element_by_xpath(f"//*[contains(@aria-label, \"撰寫貼文\")]")
 field.click()
 field.send_keys("我最愛的工作機ＱＱ")
 driver.implicitly_wait(10)
 
 click_button_by_label(label='相片／影片')
-print(driver.title)
 driver.implicitly_wait(10)
 
 
@@ -156,6 +161,6 @@ click_button_by_label(label='立即分享', element_type="span")
 driver.implicitly_wait(10)
 
 time.sleep(10)
-print('Success!')
+print('OK: Success!')
 driver.implicitly_wait(15)
 driver.quit()
