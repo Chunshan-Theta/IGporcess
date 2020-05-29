@@ -30,6 +30,8 @@ class ChromeDriver(object):
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-gpu')
 
+        # reduced the memory utilization
+        options.add_argument("-js-flags=--expose-gc");
         # disable window
         options.add_argument('--headless')
         # disable notifications
@@ -62,6 +64,7 @@ except:
 driver.set_window_size(360, 1280)
 driver.implicitly_wait(10)
 step = LoginStep(driver=driver)
+
 step.run()
 
 

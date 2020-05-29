@@ -36,7 +36,9 @@ class DriverStep(Step):
 
         with open(f"./{filename}.html", "w") as f:
             f.write(self.driver.page_source)
-            self.driver.save_screenshot(filename=f"{filename}.jpg")
+        self.driver.save_screenshot(filename=f"{filename}.png")
+        with open(f"./{filename}.info", "w") as f:
+            f.writelines([str(dict_obj)+"\n" for dict_obj in self.driver.get_log("browser")])
 
         return filename
 
