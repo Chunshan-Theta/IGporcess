@@ -52,11 +52,30 @@ class ChromeDriver(object):
         return self.driver
 
 
+class FirefoxyDriver(object):
+
+    def __init__(self, system_executable_path=True):
+
+
+        options = webdriver.FirefoxOptions()
+        options.add_argument(argument='--headless')
+
+
+
+        if system_executable_path:
+            print("INFO: using system driver")
+            self.driver = webdriver.Firefox(options=options)
+        else:
+            print("INFO: using local driver")
+            print("INFO: using system driver")
+            self.driver = webdriver.Firefox(options=options)
+    def init_driver(self):
+        return self.driver
 
 
 
 try:
-    driver = ChromeDriver(system_executable_path=False).init_driver()
+    driver = FirefoxyDriver(system_executable_path=False).init_driver()
 
 except:
     driver = ChromeDriver().init_driver()
