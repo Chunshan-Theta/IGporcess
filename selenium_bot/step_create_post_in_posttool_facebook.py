@@ -5,15 +5,30 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
 
-from lib.step_util import Step, DriverStep
+from selenium_bot.step_util import Step, DriverStep
 
+
+class patch_post(dict):
+
+    def get_content(self):
+        return self.setdefault("content", "我最愛的工作機ＱＱ")
+
+    def get_img_name(self):
+        return self.setdefault("img_name", "sample.jpg")
 
 class NewPostInPostToolStep(DriverStep):
 
-    def __init__(self, driver: WebDriver):
+    def __init__(self, driver: WebDriver, content:str = "我最愛的工作機ＱＱ", img_name:str="sample.jpg"):
         super().__init__(driver=driver)
+        self.content = content
+        self.img_name = img_name
+
+
 
     def run(self) -> bool:
+        init_post_patch = patch_post()
+        init_post_patch["content"] = self.content
+        init_post_patch["img_name"] = self.img_name
         try:
             self.click_button_by_label(label='建立貼文')
             self.driver.implicitly_wait(10)
@@ -21,7 +36,7 @@ class NewPostInPostToolStep(DriverStep):
             self.assert_label_element_exist(label="接收訊息")
             field = self.driver.find_element_by_xpath(f"//*[contains(@aria-label, \"撰寫貼文\")]")
             field.click()
-            field.send_keys("我最愛的工作機ＱＱ")
+            field.send_keys(init_post_patch.get_content())
             self.driver.implicitly_wait(10)
 
             self.click_button_by_label(label='相片／影片')
@@ -32,13 +47,13 @@ class NewPostInPostToolStep(DriverStep):
             ##field = driver.find_element_by_name(name='composer_photo')
             """
 
-            self.driver.find_element_by_name("composer_photo").send_keys(os.getcwd() + "/lib/img/sample.jpg")
+            self.driver.find_element_by_name("composer_photo").send_keys(os.getcwd() + f"/selenium_bot/img/{init_post_patch.get_img_name()}")
             time.sleep(10)
 
             self.click_button_by_label(label='貼文將會顯示在 Instagram')
             self.driver.implicitly_wait(10)
 
-            self.click_button_by_label(label='立即分享', element_type="span")
+            #self.click_button_by_label(label='立即分享', element_type="span")
             self.driver.implicitly_wait(10)
 
             self.status = True

@@ -2,7 +2,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
 
-from lib.step_util import Step, DriverStep
+from selenium_bot.step_util import Step, DriverStep
 
 
 class MovePageToPostToolStep(DriverStep):

@@ -7,13 +7,21 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 
+
 class Step(object):
 
     def __init__(self):
         self.status = None # None: init, True: success, False: fail
+        self.label: str = "Object"
 
     def run(self) -> tuple:
         raise NotImplementedError
+
+    def get_label(self):
+        return f"{self.__class__}: {self.label}"
+
+    def __print__(self):
+        return self.get_label()
 
 
 class DriverStep(Step):
@@ -21,6 +29,8 @@ class DriverStep(Step):
     def __init__(self, driver: WebDriver):
         super().__init__()
         self.driver = driver
+
+
 
     def run(self) -> tuple:
         raise NotImplementedError
@@ -113,8 +123,13 @@ class StepList(list):
         super().__init__(*args, **kwargs)
 
     def next_step(self):
-        step: Step = self.pop()
-        result = step.run()
+        step: Step = self.pop(0)
+        print(f"RUN: {step.get_label()}")
+        _ = step.run()
+
+    def run_over(self):
+        while self.__len__() > 0:
+            self.next_step()
 
 
 
