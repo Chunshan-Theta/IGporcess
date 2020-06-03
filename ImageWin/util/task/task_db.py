@@ -11,10 +11,12 @@ from ImageWin.util.task.task_manager import Task
 class db(object):
     def __init__(self,db_save_path=None, db_name = "db_event_information"):
         db_save_path = DBDIR if db_save_path is None else db_save_path
+        if not os.path.exists(db_save_path):
+            os.makedirs(db_save_path)
         self.db_dir = f"{db_save_path}{db_name}.json"
         if path.exists(self.db_dir):
             #print("loading DB")
-            self.db = json.load(fp=open(self.db_dir, "r+"))
+            self.loading4file()
         else:
             #print("creating DB")
             self.db = {}
@@ -22,8 +24,10 @@ class db(object):
 
     def output2file(self) -> None:
         json.dump(obj=self.db, fp=open(self.db_dir, "w+"), ensure_ascii=False)
-
+    def loading4file(self) -> None:
+        self.db = json.load(fp=open(self.db_dir, "r+"))
     def loading_logfile(self):
+        self.loading4file()
         logfiles = os.listdir(f"{LOGDIR}")
         logfiles = [path for path in logfiles if path.endswith("json")]
         logfiles.sort()
@@ -38,6 +42,8 @@ class db(object):
             except json.decoder.JSONDecodeError as e:
                 print(f"log file error: {logfile},{e}")
 
+        self.output2file()
+
     def insert_by_key(self, key: str, value: dict) -> Optional[str]:
         """
         insert a new data.
@@ -47,10 +53,12 @@ class db(object):
         :param value:
         :return:
         """
+        self.loading4file()
         key_filterify = self.key_filter(key=key)
         if key_filterify in self.db:
             return None
         self.db[key_filterify] = value
+        self.output2file()
         return key
 
     def find_by_key(self, key: str) -> Optional[dict]:
@@ -61,6 +69,7 @@ class db(object):
         :param key:
         :return:
         """
+        self.loading4file()
         key_filterify = self.key_filter(key=key)
         if key_filterify not in self.db:
             return None
@@ -75,7 +84,7 @@ class db(object):
         :param value:
         :return: return True or False for symbol of success or not
         """
-
+        self.loading4file()
         key_filterify = self.key_filter(key=key)
         if key_filterify not in self.db:
             return False
@@ -83,12 +92,18 @@ class db(object):
             return False
 
         self.db[key_filterify][column] = value
+        self.output2file()
         return True
 
     def delete_by_key(self, key: str, column: str):
+        self.loading4file()
+        self.loading_logfile()
         self.db[self.key_filter(key=key)][column] = None
+        self.output2file()
+
 
     def find_all(self) -> list:
+        self.loading4file()
         return [(key, val) for key, val in self.db.items()]
 
     @classmethod

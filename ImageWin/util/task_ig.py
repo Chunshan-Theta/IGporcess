@@ -21,7 +21,6 @@ class IgAction(object):
         self.db = db(db_name="ig_action")
 
     def new_a_post(self, event_name: str, event_information: dict, output: bool = True) -> dict:
-
         def ig_push(content="我最愛的工作機ＱＱ", img_name="sample.jpg") :
             try:
                 driver = FirefoxyDriver().init_driver()
@@ -58,7 +57,9 @@ class IgAction(object):
             "main_content_of_the_pos": main_content,
             "updated_time": datetime.now().strftime("%Y%m%d_%H%M%S")
         }
-        ig_push(content=main_content, img_name=f"{JPGDIR}{event_name}.jpg")
+        content, img_name = main_content, f"{JPGDIR}{event_name}.jpg"
+        #print(f"content:{content}, \nimg_name:{img_name}")
+        ig_push(content=content, img_name=img_name)
         self.db.insert_by_key(key=event_name, value=ig_post_obj)
         if output:
             self.db.output2file()
@@ -105,7 +106,7 @@ class IgTaskPush(Task):
     def __init__(self):
         super().__init__(task_label="ig_push")
         self.logging = get_logger(name="TaskIGPush")
-        self.task_type = "delay:0.6"
+        self.task_type = "delay:0.01"
         self.db_event_information = db()
         self.db_ig_action = IgAction().db
 
