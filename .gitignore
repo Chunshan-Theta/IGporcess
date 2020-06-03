@@ -1,0 +1,11 @@
+venv/
+.idea/
+*.pyc
+util/__pycache__/
+log/
+png/
+*.png
+*.jpg
+*.otf
+*.log
+util/db.json

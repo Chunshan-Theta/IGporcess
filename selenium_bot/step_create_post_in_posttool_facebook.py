@@ -33,11 +33,7 @@ class NewPostInPostToolStep(DriverStep):
             self.click_button_by_label(label='建立貼文')
             self.driver.implicitly_wait(10)
 
-            self.assert_label_element_exist(label="接收訊息")
-            field = self.driver.find_element_by_xpath(f"//*[contains(@aria-label, \"撰寫貼文\")]")
-            field.click()
-            field.send_keys(init_post_patch.get_content())
-            self.driver.implicitly_wait(10)
+
 
             self.click_button_by_label(label='相片／影片')
             self.driver.implicitly_wait(10)
@@ -47,13 +43,21 @@ class NewPostInPostToolStep(DriverStep):
             ##field = driver.find_element_by_name(name='composer_photo')
             """
 
-            self.driver.find_element_by_name("composer_photo").send_keys(os.getcwd() + f"/selenium_bot/img/{init_post_patch.get_img_name()}")
+            #self.driver.find_element_by_name("composer_photo").send_keys(os.getcwd() + f"/selenium_bot/img/{init_post_patch.get_img_name()}")
+            print(init_post_patch.get_img_name())
+            self.driver.find_element_by_name("composer_photo").send_keys(f"{init_post_patch.get_img_name()}")
             time.sleep(10)
+
+            self.assert_label_element_exist(label="接收訊息")
+            field = self.driver.find_element_by_xpath(f"//*[contains(@aria-label, \"介紹一下\")]")
+            field.click()
+            field.send_keys(init_post_patch.get_content())
+            self.driver.implicitly_wait(10)
 
             self.click_button_by_label(label='貼文將會顯示在 Instagram')
             self.driver.implicitly_wait(10)
 
-            #self.click_button_by_label(label='立即分享', element_type="span")
+            self.click_button_by_label(label='立即分享', element_type="span")
             self.driver.implicitly_wait(10)
 
             self.status = True

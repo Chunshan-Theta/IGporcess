@@ -16,7 +16,7 @@ class ChromeDriver(object):
         # reduced the memory utilization
         options.add_argument("-js-flags=--expose-gc");
         # disable window
-        options.add_argument('--headless')
+        #options.add_argument('--headless')
         # disable notifications
         prefs = {
             'profile.default_content_setting_values':
@@ -30,7 +30,7 @@ class ChromeDriver(object):
             self.driver = webdriver.Chrome(options=options)
         else:
             print("INFO: using local driver Chrome")
-            self.driver = webdriver.Chrome(options=options, executable_path=f'{os.getcwd()}/lib/chromedriver_mac')
+            self.driver = webdriver.Chrome(options=options, executable_path=f'{os.getcwd()}/selenium_bot/chromedriver_mac')
     def init_driver(self):
         return self.driver
 

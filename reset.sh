@@ -1,3 +1,5 @@
+docker cp ig_process_container:/home/ImageWin/util/db/ /Users/gavinwang/selenium_porcess/ImageWin/util/
+
 docker stop ig_process_container
 docker container rm ig_process_container
 docker image rm ig_process_image_py37
