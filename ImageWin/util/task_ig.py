@@ -21,7 +21,6 @@ class IgAction(object):
         self.db = db(db_name="ig_action")
 
     def new_a_post(self, event_name: str, event_information: dict, output: bool = True) -> dict:
-
         def ig_push(content="我最愛的工作機ＱＱ", img_name="sample.jpg") :
             try:
                 driver = FirefoxyDriver().init_driver()
@@ -41,7 +40,7 @@ class IgAction(object):
             steps.run_over()
 
             time.sleep(10)
-            print('OK: Success!')
+            print(f'OK: Success! event_name:{event_name}, content len: {len(content)}')
             driver.implicitly_wait(15)
             driver.quit()
         #print(len(main_content_of_the_pos),main_content_of_the_pos)
@@ -50,7 +49,7 @@ class IgAction(object):
         main_tags = self._generate_date_tag_by_date(
             event_time_start=datetime.strptime(event_information.get('time_start'), "%Y/%m/%d"),
             event_time_end=datetime.strptime(event_information.get('time_end'), "%Y/%m/%d"))
-        main_content = f"活動連結 -> {main_link} \n #活動 #展覽 {main_tags}"
+        main_content = f"{event_name} \n {main_link} \n #出遊 #假日 # 文青 #活動 #展覽 {main_tags}"
         assert len(main_content) < 700, "IG limit number of the post."
 
         ig_post_obj = {
@@ -58,7 +57,9 @@ class IgAction(object):
             "main_content_of_the_pos": main_content,
             "updated_time": datetime.now().strftime("%Y%m%d_%H%M%S")
         }
-        ig_push(content=main_content, img_name=f"{JPGDIR}{event_name}.jpg")
+        content, img_name = main_content, f"{JPGDIR}{event_name}.jpg"
+        #print(f"content:{content}, \nimg_name:{img_name}")
+        ig_push(content=content, img_name=img_name)
         self.db.insert_by_key(key=event_name, value=ig_post_obj)
         if output:
             self.db.output2file()
@@ -87,7 +88,7 @@ class IgAction(object):
         #print(event_time_start,event_time_end,count_cross_days)
         return_str = list()
 
-        for i in range(count_cross_days):
+        for i in range(count_cross_days+1):
             increase_day = event_time_start + timedelta(days=i)
             event_month_label = f"#{increase_day.strftime('%Y年%m月')}文青活 "
             if event_month_label not in return_str:
