@@ -40,7 +40,7 @@ class IgAction(object):
             steps.run_over()
 
             time.sleep(10)
-            print('OK: Success!')
+            print(f'OK: Success! event_name:{event_name}, content len: {len(content)}')
             driver.implicitly_wait(15)
             driver.quit()
         #print(len(main_content_of_the_pos),main_content_of_the_pos)
@@ -49,7 +49,7 @@ class IgAction(object):
         main_tags = self._generate_date_tag_by_date(
             event_time_start=datetime.strptime(event_information.get('time_start'), "%Y/%m/%d"),
             event_time_end=datetime.strptime(event_information.get('time_end'), "%Y/%m/%d"))
-        main_content = f"活動連結 -> {main_link} \n #活動 #展覽 {main_tags}"
+        main_content = f"{event_name} \n {main_link} \n #出遊 #假日 # 文青 #活動 #展覽 {main_tags}"
         assert len(main_content) < 700, "IG limit number of the post."
 
         ig_post_obj = {
@@ -88,7 +88,7 @@ class IgAction(object):
         #print(event_time_start,event_time_end,count_cross_days)
         return_str = list()
 
-        for i in range(count_cross_days):
+        for i in range(count_cross_days+1):
             increase_day = event_time_start + timedelta(days=i)
             event_month_label = f"#{increase_day.strftime('%Y年%m月')}文青活 "
             if event_month_label not in return_str:
@@ -106,7 +106,7 @@ class IgTaskPush(Task):
     def __init__(self):
         super().__init__(task_label="ig_push")
         self.logging = get_logger(name="TaskIGPush")
-        self.task_type = "delay:0.01"
+        self.task_type = "delay:0.6"
         self.db_event_information = db()
         self.db_ig_action = IgAction().db
 
