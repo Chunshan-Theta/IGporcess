@@ -1,5 +1,5 @@
+
 from ImageWin.util.task_pic_maker import PicTaskMaker
-from ImageWin.util.frame_base import BoxImg, EventLineFrame1Img1Text
 
 """
 a = BoxImg(img_dir='https://www.tainex1.com.tw/upload/activity/5e55c44b901a9.jpg')

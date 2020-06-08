@@ -1,3 +1,4 @@
+import re
 import time
 from datetime import datetime, timedelta
 
@@ -19,6 +20,11 @@ from selenium_bot.step_util import StepList
 class IgAction(object):
     def __init__(self):
         self.db = db(db_name="ig_action")
+
+    def remove_punctuation(self, line):
+        rule = re.compile("[^ a-zA-Z0-9\u4e00-\u9fa5]")
+        line = rule.sub(' ', line)
+        return line
 
     def new_a_post(self, event_name: str, event_information: dict, output: bool = True) -> dict:
         def ig_push(content="我最愛的工作機ＱＱ", img_name="sample.jpg") :
@@ -46,10 +52,11 @@ class IgAction(object):
         #print(len(main_content_of_the_pos),main_content_of_the_pos)
         main_pic_path = event_information.get('img_link')
         main_link = event_information.get('link')
+        event_name_tags_split_by_space = str(" ".join([f"#{i}" for i in self.remove_punctuation(event_name).split()]))
         main_tags = self._generate_date_tag_by_date(
             event_time_start=datetime.strptime(event_information.get('time_start'), "%Y/%m/%d"),
             event_time_end=datetime.strptime(event_information.get('time_end'), "%Y/%m/%d"))
-        main_content = f"{event_name} \n {main_link} \n #出遊 #假日 # 文青 #活動 #展覽 {main_tags}"
+        main_content = f"{event_name} \n {main_link} \n #出遊 #假日 #文青 #活動 #展覽 {event_name_tags_split_by_space} {main_tags}"
         assert len(main_content) < 700, "IG limit number of the post."
 
         ig_post_obj = {

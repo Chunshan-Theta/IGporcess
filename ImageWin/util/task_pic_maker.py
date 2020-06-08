@@ -31,6 +31,7 @@ class PicTaskMaker(Task):
                     self.logging.warning(e)
                 except Exception as e:
                     self.logging.error(e)
+                    raise e
             else:
                 print(f"{name}.png exists")
 

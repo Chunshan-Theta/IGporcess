@@ -29,7 +29,8 @@ class Box(object):
 
     @classmethod
     def color_similarity(cls, im: Image, a: int = None) -> tuple:
-        def non_white(colors:tuple):
+        def non_white(colors: tuple):
+            colors = (255,255,255,255) if isinstance(colors, int) else colors
             for c in colors:
                 if c != 255:
                     return True
@@ -48,6 +49,10 @@ class Box(object):
                 A += pixel[3]
             else:
                 A += 10
+
+        # empty_photo
+        if all([R, G, B, A]) or pix_num == 0:
+            return 255, 255, 255, 100
 
         return int(R / pix_num), int(G / pix_num), int(B / pix_num), int(A / pix_num) if a is None else a
 

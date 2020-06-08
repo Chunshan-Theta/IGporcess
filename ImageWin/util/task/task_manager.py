@@ -55,7 +55,7 @@ class TaskManager(object):
 
         except Exception as e:
             #print(f"Unknow Error (check delay task stage): {str(e)},{type(e)}")
-            self.logging.exception(f"Unknow Error (check delay task stage): {str(e)},{type(e)}")
+            self.logging.exception(f"Unknow Error (check delay task stage): {str(e)},{type(e)},{e.with_traceback()}")
 
         try: # run stage
             assert len(self.task_list) > 0, "pass stage: empty_task_list"
