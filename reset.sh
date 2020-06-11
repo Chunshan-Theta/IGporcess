@@ -1,4 +1,6 @@
-docker cp ig_process_container:/home/ImageWin/util/db/ /Users/gavinwang/selenium_porcess/ImageWin/util/
+BASEDIR=$(pwd)
+
+docker cp ig_process_container:/home/ImageWin/util/db/  "$(pwd)"/ImageWin/util/
 
 docker stop ig_process_container
 docker container rm ig_process_container

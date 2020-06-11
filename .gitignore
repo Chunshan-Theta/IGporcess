@@ -7,6 +7,6 @@ log/
 png/
 *.png
 *.jpg
-*.otf
+#*.otf
 *.log
 util/db.json

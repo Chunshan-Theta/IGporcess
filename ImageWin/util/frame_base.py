@@ -1,5 +1,6 @@
 import datetime
 import shutil
+from io import StringIO
 
 import requests
 from PIL import ImageFont, ImageDraw
@@ -63,6 +64,8 @@ class BoxImg(Box):
         self.img_dir = img_dir
         self.block_type = "Img"
         self.im: PIL.Image.Image = PIL.Image.open(self.get_photo(img_dir=img_dir))
+        if self.im.height >4000 or self.im.width>4000:
+            self.im = self.im.resize((int(self.im.width/4),int(self.im.height/4)))
         self.block_height, self.block_width = self.im.size
         self.border = border
 
@@ -76,12 +79,15 @@ class BoxImg(Box):
 
     def get_photo(self, img_dir: str = None, save_pic=False, save_pic_name="sample"):
         self.img_dir = self.img_dir if img_dir is None else img_dir
-        r = requests.get(self.img_dir, stream=True, timeout=30)
+        r = requests.get(self.img_dir, stream=True, timeout=10)
         if r.status_code == 200:
+            print("got photo")
             if save_pic:
                 with open(f"./{save_pic_name}.png", 'wb') as f:
                     r.raw.decode_content = True
+
                     shutil.copyfileobj(r.raw, f)
+            print("returned photo")
             return r.raw
 
         return None
@@ -170,7 +176,7 @@ class LineFrame(Frame):
 
         current_width, current_height = 0, 0
         for item in self.stack():
-            print(f"item.block_width:{item.box_label}, item.block_width:{item.block_width}, item.block_height:{item.block_height}")
+            print(f"item.block_width:{item.block_width}, item.block_height:{item.block_height}")
             item_im = item.to_pic()
             im.paste(im=item_im, box=(0, current_height))
             current_height += item.block_height

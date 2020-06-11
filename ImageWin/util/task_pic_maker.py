@@ -18,6 +18,7 @@ class PicTaskMaker(Task):
         for name, data in self.db:
             if f"{name}.{subfilename}" not in self.exists_file:
                 try:
+                    self.logging.info(f"saving...{name} - {data['img_link']}")
                     image_title = data['location']
                     a = EventLineFrame1Img1Text(image_title=image_title, img_dir=data['img_link'],
                                                 content=f"{data['name']}\n{data['time_start'].replace('/','')}"

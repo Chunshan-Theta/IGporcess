@@ -22,7 +22,7 @@ class db(object):
             self.db = {}
             self.output2file()
 
-    def output2file(self) -> None:
+    def output2file(self):
         json.dump(obj=self.db, fp=open(self.db_dir, "w+"), ensure_ascii=False)
     def loading4file(self) -> None:
         self.db = json.load(fp=open(self.db_dir, "r+"))
