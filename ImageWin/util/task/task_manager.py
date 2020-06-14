@@ -100,13 +100,13 @@ class TaskManager(object):
         self.task_list.append(task_obj)
 
     def manager_status(self):
-        task_list = "Task list: "
+        task_list = ""
         for task in self.task_list:
             task_list += f"{task.task_label}"
             task_list += ", "
         task_list = task_list[:-2]
 
-        delay_task_list = "delay Task list: "
+        delay_task_list = ""
         for task, nexttimestamp in self.delay_task_list:
             nexttimestamp: datetime.datetime
             delay_task_list += f"{task.task_label}:{nexttimestamp.strftime('%Y/%m/%d %H:%M:%S')}"

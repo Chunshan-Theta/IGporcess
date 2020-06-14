@@ -120,6 +120,7 @@ class IgTaskPush(Task):
     def task_exe(self, logger_option: bool= False):
         for event_name, event_information in self.db_event_information.find_all():
             if self.db_ig_action.find_by_key(key=event_name) is None and self._ontime(event_information['time_end']):
+                self.logging.info(f"Post: {event_name}")
 
                 re = IgAction().new_a_post(event_name=event_name, event_information=event_information)
                 if logger_option:
