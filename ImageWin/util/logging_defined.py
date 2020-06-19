@@ -28,5 +28,5 @@ def get_logger(name: str = None, file_name: str = 'Main', ENABLE_LOG_TO_FILE:boo
         filehandler.suffix = "%Y-%m-%d.log"
         if len(logger.handlers) == 0 :
             logger.addHandler(filehandler)
-    logger.setLevel(level='INFO')
+    logger.setLevel(level='DEBUG')
     return logger
