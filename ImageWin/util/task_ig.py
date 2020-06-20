@@ -2,7 +2,7 @@ import re
 import time
 from datetime import datetime, timedelta
 
-from ImageWin.util.task.task_db import db
+from ImageWin.util.task.task_db import db_tiny
 from ImageWin.util.task.task_manager import Task
 from ImageWin.util.logging_defined import get_logger
 from ImageWin.util.config import JPGDIR

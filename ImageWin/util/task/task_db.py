@@ -6,9 +6,119 @@ from ImageWin.util.config import LOGDIR, DBDIR
 from os import path
 from ImageWin.util.task_crawler import CrawlerTask
 from ImageWin.util.task.task_manager import Task
+from tinydb import TinyDB, Query
+from tinydb.table import Table
+
+class db_core(object):
+    @classmethod
+    def key_filter(cls, key: str) -> str:
+        disable_symbols = [".", "/", "|", "-", "\\", "?", "\"", "｜", "*", ":", ">", "<"]
+        for symbol in disable_symbols:
+            key = key.replace(symbol, "_")
+
+        return key
+    pass
 
 
-class db(object):
+    def insert_by_key(self, key: str, value: dict):
+        raise NotImplementedError
+    def find_by_key(self, key: str):
+        raise NotImplementedError
+    def update_by_key(self, key: str, column: str, value):
+        raise NotImplementedError
+    def delete_by_key(self, key: str, column: str):
+        raise NotImplementedError
+    def find_all(self) -> list:
+        raise NotImplementedError
+
+
+class db_tiny(db_core):
+    def __init__(self,db_save_path='.', db_name = "db_event_information",tabel_name="default"):
+        self.db_dir = f"{db_save_path}{db_name}.json"
+        self.db_file = TinyDB(self.db_dir)
+        self.key_label = "id"
+        self.tabel_name = tabel_name
+        self.db = self.db_file.table(self.tabel_name)
+
+
+    def insert_by_key(self, key: str, value: dict):
+        new_key = self.key_filter(key=key)
+        assert self.find_by_key(key=new_key) == [], f"key is exist: {new_key}"
+        value.update({self.key_label:new_key})
+        self.db.insert(value)
+
+
+    def find_by_key(self, key: str):
+        requirements=[
+            (self.key_label, "==", self.key_filter(key=key))
+        ]
+        return self.db.search(lambda row: self._basic_cond(row, requirements))
+
+
+    def update_by_key(self, key: str, column: str, value):
+        update_fields = {
+            column: value,
+        }
+
+        new_key = self.key_filter(key=key)
+        if column == self.key_label:
+            assert self.find_by_key(key=new_key) == [], f"key is exist: {self.find_by_key(key=new_key)}"
+        requirements = [
+            (self.key_label, "==", self.key_filter(key=new_key))
+        ]
+        return self.db.update(fields=update_fields, cond=lambda row: self._basic_cond(row, requirements))
+
+
+    def delete_by_key(self, key: str):
+        requirements = [
+            (self.key_label, "==", self.key_filter(key=key))
+        ]
+
+        return self.db.remove(cond=lambda db: self._basic_cond(db, requirements))
+    def find_all(self) -> list:
+        return [(row[self.key_label], row) for row in self.db.all()]
+
+    def drop_all(self):
+        self.db_file.drop_table(name=self.tabel_name)
+    def _basic_cond(self,row, requirements:[tuple]):
+        for column, cond, value in requirements:
+            if column not in row:
+                return False
+            if cond == '==' and not row[column] == value:
+                return False
+            if cond == '!=' and not row[column] != value:
+                return False
+            if cond == '>' and not row[column] > value:
+                return False
+            if cond == '<' and not row[column] < value:
+                return False
+            if cond == '>=' and not row[column] >= value:
+                return False
+            if cond == '<=' and not row[column] <= value:
+                return False
+            if cond == 'substring' or cond == 'contain':
+                try:
+                    str(row[column]).index(value)
+                except Exception:
+                    return False
+        return True
+
+    @classmethod
+    def loading_logfile(cls):
+        logfiles = os.listdir(f"{LOGDIR}")
+        logfiles = [path for path in logfiles if path.endswith("json")]
+        logfiles.sort()
+        # print(logfiles)
+        for logfile in logfiles:
+            try:
+                objs = CrawlerTask.load_result(filename=f"{LOGDIR}{logfile}")
+                for obj in objs:
+                    filtered_key = cls.key_filter(obj['name'])
+                    if cls.db.find_by_key(filtered_key) == []:
+                        cls.db.insert_by_key(key=filtered_key, value=obj)
+            except json.decoder.JSONDecodeError as e:
+                print(f"log file error: {logfile},{e}")
+class db(db_core):
     def __init__(self,db_save_path=None, db_name = "db_event_information"):
         db_save_path = DBDIR if db_save_path is None else db_save_path
         if not os.path.exists(db_save_path):
@@ -97,10 +207,10 @@ class db(object):
         self.output2file()
         return True
 
-    def delete_by_key(self, key: str, column: str):
+    def delete_by_key(self, key: str):
         self.loading4file()
         self.loading_logfile()
-        self.db[self.key_filter(key=key)][column] = None
+        self.db[self.key_filter(key=key)]= None
         self.output2file()
 
 
@@ -108,25 +218,18 @@ class db(object):
         self.loading4file()
         return [(key, val) for key, val in self.db.items()]
 
-    @classmethod
-    def key_filter(cls, key: str) -> str:
-        disable_symbols =[".", "/", "|", "-", "\\", "?", "\"", "｜", "*", ":", ">", "<"]
-        for symbol in disable_symbols:
-            key = key.replace(symbol, "_")
 
-        return key
 
 
 class DbTaskUpdateLoop(Task):
     def __init__(self, task_type="delay:1.5"):
         super().__init__(task_label="db")
         self.task_type = task_type
-        self.db = db()
+        self.db = db_tiny()
 
     def task_exe(self):
         self.db.loading_logfile()
 
     def task_exe_and_save_result(self) -> str:
         self.task_exe()
-        self.db.output2file()
         return self.db.db_dir
