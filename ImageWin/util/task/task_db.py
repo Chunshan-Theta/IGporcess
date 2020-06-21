@@ -85,7 +85,7 @@ class db_tiny(db_core):
 
     def key_exist(self,key)->bool:
         filtered_key = self.key_filter(key=key)
-        return True if self.find_by_key(filtered_key) == [] else False
+        return False if self.find_by_key(filtered_key) == [] else True
     def _basic_cond(self,row, requirements:[tuple]):
         for column, cond, value in requirements:
             if column not in row:
