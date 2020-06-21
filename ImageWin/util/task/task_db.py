@@ -33,9 +33,9 @@ class db_core(object):
 
 
 class db_tiny(db_core):
-    def __init__(self,db_save_path='.', db_name = "db_event_information",tabel_name="default"):
+    def __init__(self,db_save_path='./', db_name = "db_event_information",tabel_name="default"):
         self.db_dir = f"{db_save_path}{db_name}.json"
-        self.db_file = TinyDB(self.db_dir)
+        self.db_file = TinyDB(self.db_dir,ensure_ascii=False)
         self.key_label = "id"
         self.tabel_name = tabel_name
         self.db = self.db_file.table(self.tabel_name)
