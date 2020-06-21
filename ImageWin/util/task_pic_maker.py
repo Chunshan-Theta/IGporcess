@@ -9,7 +9,7 @@ class PicTaskMaker(Task):
     def __init__(self):
         super().__init__(task_label="pic_Maker")
         self.task_type = "delay:6"
-        self.db = db().find_all()
+        self.db = db_tiny().find_all()
         if not os.path.exists(f"{PNGDIR}"):
             os.makedirs(f"{PNGDIR}")
         self.exists_file = os.listdir(f"{PNGDIR}")

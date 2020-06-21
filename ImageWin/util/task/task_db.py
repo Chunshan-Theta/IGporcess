@@ -103,8 +103,8 @@ class db_tiny(db_core):
                     return False
         return True
 
-    @classmethod
-    def loading_logfile(cls):
+
+    def loading_logfile(self):
         logfiles = os.listdir(f"{LOGDIR}")
         logfiles = [path for path in logfiles if path.endswith("json")]
         logfiles.sort()
@@ -113,9 +113,9 @@ class db_tiny(db_core):
             try:
                 objs = CrawlerTask.load_result(filename=f"{LOGDIR}{logfile}")
                 for obj in objs:
-                    filtered_key = cls.key_filter(obj['name'])
-                    if cls.db.find_by_key(filtered_key) == []:
-                        cls.db.insert_by_key(key=filtered_key, value=obj)
+                    filtered_key = self.key_filter(obj['name'])
+                    if self.db.find_by_key(filtered_key) == []:
+                        self.db.insert_by_key(key=filtered_key, value=obj)
             except json.decoder.JSONDecodeError as e:
                 print(f"log file error: {logfile},{e}")
 class db(db_core):
@@ -220,9 +220,8 @@ class db(db_core):
 
 
 
-
 class DbTaskUpdateLoop(Task):
-    def __init__(self, task_type="delay:1.5"):
+    def __init__(self, task_type="delay:0.1"):
         super().__init__(task_label="db")
         self.task_type = task_type
         self.db = db_tiny()

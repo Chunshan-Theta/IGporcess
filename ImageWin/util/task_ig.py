@@ -19,7 +19,7 @@ from selenium_bot.step_util import StepList
 
 class IgAction(object):
     def __init__(self):
-        self.db = db(db_name="ig_action")
+        self.db = db_tiny(db_name="ig_action")
 
     def remove_punctuation(self, line):
         rule = re.compile("[^ a-zA-Z0-9\u4e00-\u9fa5]")
@@ -114,7 +114,7 @@ class IgTaskPush(Task):
         super().__init__(task_label="ig_push")
         self.logging = get_logger(name="TaskIGPush")
         self.task_type = "delay:0.6"
-        self.db_event_information = db()
+        self.db_event_information = db_tiny()
         self.db_ig_action = IgAction().db
 
     def task_exe(self, logger_option: bool= False):
