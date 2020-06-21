@@ -68,8 +68,6 @@ class IgAction(object):
         #print(f"content:{content}, \nimg_name:{img_name}")
         ig_push(content=content, img_name=img_name)
         self.db.insert_by_key(key=event_name, value=ig_post_obj)
-        if output:
-            self.db.output2file()
         return ig_post_obj
 
     def new_multi_posts(self, events_name: list, events_information: list) -> list:
