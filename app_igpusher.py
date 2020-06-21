@@ -11,7 +11,6 @@ manager.add_task(task_obj=DbTaskUpdateLoop())
 manager.add_task(task_obj=CrawlerTaskNangang())
 manager.add_task(task_obj=CrawlerTaskSongshan())
 manager.add_task(task_obj=CrawlerTaskHuashan())
-manager.add_task(task_obj=CrawlerTaskHuashan())
 
 
 

@@ -26,15 +26,17 @@ class db_core(object):
         raise NotImplementedError
     def update_by_key(self, key: str, column: str, value):
         raise NotImplementedError
-    def delete_by_key(self, key: str, column: str):
+    def delete_by_key(self, key: str):
         raise NotImplementedError
-    def find_all(self) -> list:
+    def find_all(self) -> [tuple]:
         raise NotImplementedError
 
 
 class db_tiny(db_core):
-    def __init__(self,db_save_path='./', db_name = "db_event_information",tabel_name="default"):
+    def __init__(self,db_save_path=None, db_name = "db_event_information",tabel_name="default"):
+        db_save_path = DBDIR if db_save_path is None else db_save_path
         self.db_dir = f"{db_save_path}{db_name}.json"
+        print(f"SAVE: {self.db_dir}")
         self.db_file = TinyDB(self.db_dir,ensure_ascii=False)
         self.key_label = "id"
         self.tabel_name = tabel_name
@@ -75,11 +77,15 @@ class db_tiny(db_core):
         ]
 
         return self.db.remove(cond=lambda db: self._basic_cond(db, requirements))
-    def find_all(self) -> list:
+    def find_all(self) -> [tuple]:
         return [(row[self.key_label], row) for row in self.db.all()]
 
     def drop_all(self):
         self.db_file.drop_table(name=self.tabel_name)
+
+    def key_exist(self,key)->bool:
+        filtered_key = self.key_filter(key=key)
+        return True if self.find_by_key(filtered_key) == [] else False
     def _basic_cond(self,row, requirements:[tuple]):
         for column, cond, value in requirements:
             if column not in row:
@@ -114,8 +120,8 @@ class db_tiny(db_core):
                 objs = CrawlerTask.load_result(filename=f"{LOGDIR}{logfile}")
                 for obj in objs:
                     filtered_key = self.key_filter(obj['name'])
-                    if self.db.find_by_key(filtered_key) == []:
-                        self.db.insert_by_key(key=filtered_key, value=obj)
+                    if self.find_by_key(filtered_key) == []:
+                        self.insert_by_key(key=filtered_key, value=obj)
             except json.decoder.JSONDecodeError as e:
                 print(f"log file error: {logfile},{e}")
 class db(db_core):
@@ -225,6 +231,7 @@ class DbTaskUpdateLoop(Task):
         super().__init__(task_label="db")
         self.task_type = task_type
         self.db = db_tiny()
+
 
     def task_exe(self):
         self.db.loading_logfile()

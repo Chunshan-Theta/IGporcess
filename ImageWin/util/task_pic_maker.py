@@ -9,13 +9,13 @@ class PicTaskMaker(Task):
     def __init__(self):
         super().__init__(task_label="pic_Maker")
         self.task_type = "delay:6"
-        self.db = db_tiny().find_all()
+        self.db = db_tiny()
         if not os.path.exists(f"{PNGDIR}"):
             os.makedirs(f"{PNGDIR}")
         self.exists_file = os.listdir(f"{PNGDIR}")
 
     def task_exe(self,subfilename:str ="jpg", **kwargs):
-        for name, data in self.db:
+        for name, data in self.db.find_all():
             if f"{name}.{subfilename}" not in self.exists_file:
                 try:
                     self.logging.info(f"saving...{name} - {data['img_link']}")
