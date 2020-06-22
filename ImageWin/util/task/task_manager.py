@@ -57,10 +57,11 @@ class TaskManager(object):
             #print(f"Unknow Error (check delay task stage): {str(e)},{type(e)}")
             self.logging.exception(f"Unknow Error (check delay task stage): {str(e)},{type(e)},{e.with_traceback()}")
 
+        now_task = None
         try: # run stage
             assert len(self.task_list) > 0, "pass stage: empty_task_list"
             # initiate task
-            now_task: Task = self.task_list.pop()
+            now_task = self.task_list.pop()
             self.logging.info(f"task_label:{now_task.task_label}")
 
             now_task.stage = "pop"
@@ -70,15 +71,7 @@ class TaskManager(object):
             now_task.task_exe_and_save_result() if save2file else now_task.task_exe()
             # finished the task
             now_task.stage = "finished"
-            if now_task.task_type == "forever":
-                self.task_list.append(now_task)
-                now_task.stage = "re_init"
-            if 'delay' in now_task.task_type:
-                delay_hr = float(now_task.task_type[now_task.task_type.find(":")+1:]) if ":" in now_task.task_type else 1
-                self.add_delay_task(task_obj=now_task, delay_hr=delay_hr)
-                self.logging.debug(f"add job to waited line:{now_task.task_label}")
 
-            return True
 
         except ValueError as e:
             self.logging.exception(f"ValueError Error: {now_task.task_type},task_type is wrong,{str(e)}")
@@ -90,6 +83,19 @@ class TaskManager(object):
         except Exception as e:
             self.logging.exception(f"Unknow Error (run stage): {str(e)},{type(e)}")
 
+        finally:
+            # re-add the job to line.
+            if isinstance(now_task, Task):
+                if now_task.task_type == "forever":
+                    self.task_list.append(now_task)
+                    now_task.stage = "re_init"
+                if 'delay' in now_task.task_type:
+                    delay_hr = float(now_task.task_type[now_task.task_type.find(":")+1:]) if ":" in now_task.task_type else 1
+                    self.add_delay_task(task_obj=now_task, delay_hr=delay_hr)
+                    self.logging.debug(f"add job to waited line:{now_task.task_label}")
+
+            return True
+
         return False
 
     def add_delay_task(self, task_obj: Task, delay_hr: float):
@@ -99,13 +105,28 @@ class TaskManager(object):
     def add_task(self,task_obj: Task):
         self.task_list.append(task_obj)
 
+    def _list_task_labels(self):
+        task_list = list()
+        for task in self.task_list:
+            task_list.append(task.task_label)
+
+        return task_list
+
+    def _list_delay_task_labels(self):
+        delay_task_list = list()
+        for task, nexttimestamp in self.delay_task_list:
+            delay_task_list.append(task.task_label)
+
+        return delay_task_list
+
     def manager_status(self):
-        task_list = ""
+        task_list = ",".join(self._list_task_labels())
+        """
         for task in self.task_list:
             task_list += f"{task.task_label}"
             task_list += ", "
         task_list = task_list[:-2]
-
+        """
         delay_task_list = ""
         for task, nexttimestamp in self.delay_task_list:
             nexttimestamp: datetime.datetime
