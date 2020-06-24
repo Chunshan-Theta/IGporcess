@@ -3,7 +3,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
 
 from auth import username, password
-from selenium_bot.step_util import Step, DriverStep
+from SeleniumBot.step_util import Step, DriverStep
 
 
 class LoginStep(DriverStep):

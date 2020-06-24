@@ -1,4 +1,4 @@
-from ImageWin.util.task.task_db import db_tiny
+from TaskManger import db_tiny
 
 db = db_tiny(db_name="unit_test")
 db.drop_all()

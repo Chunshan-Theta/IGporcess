@@ -1,6 +1,6 @@
 from ImageWin.util.frame_base import EventLineFrame1Img1Text
-from ImageWin.util.task.task_db import db_tiny
-from ImageWin.util.task.task_manager import Task
+from TinyDBEasy.common import db_tiny
+from TaskManger.task_manager import Task
 import os
 from ImageWin.util.config import PNGDIR
 from urllib3.exceptions import ReadTimeoutError

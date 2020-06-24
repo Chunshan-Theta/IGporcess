@@ -5,9 +5,9 @@ from typing import Optional
 from ImageWin.util.config import LOGDIR, DBDIR
 from os import path
 from ImageWin.util.task_crawler import CrawlerTask
-from ImageWin.util.task.task_manager import Task
-from tinydb import TinyDB, Query
-from tinydb.table import Table
+from TaskManger.task_manager import Task
+from tinydb import TinyDB
+
 
 class db_core(object):
     @classmethod

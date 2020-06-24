@@ -1,4 +1,4 @@
-from ImageWin.util.task.task_manager import TaskManager
+from TaskManger import TaskManager
 from ImageWin.util.task_ig import IgTaskPush
 
 manager = TaskManager()

@@ -1,4 +1,4 @@
-from ImageWin.util.task.task_db import db
+from TaskManger import db
 
 a = db()
 a.loading_logfile()

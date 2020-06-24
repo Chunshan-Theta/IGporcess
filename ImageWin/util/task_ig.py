@@ -2,18 +2,16 @@ import re
 import time
 from datetime import datetime, timedelta
 
-from ImageWin.util.task.task_db import db_tiny
-from ImageWin.util.task.task_manager import Task
+from TinyDBEasy.common import db_tiny
+from TaskManger.task_manager import Task
 from ImageWin.util.logging_defined import get_logger
 from ImageWin.util.config import JPGDIR
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.common.by import By
 
-from selenium_bot.driver import FirefoxyDriver, ChromeDriver
-from selenium_bot.step_create_post_in_posttool_facebook import NewPostInPostToolStep
-from selenium_bot.step_login_facebook import LoginStep
-from selenium_bot.step_movepage_facebook import MovePageToPostToolStep
-from selenium_bot.step_util import StepList
+from SeleniumBot.driver import FirefoxyDriver, ChromeDriver
+from SeleniumBot.step_create_post_in_posttool_facebook import NewPostInPostToolStep
+from SeleniumBot.step_login_facebook import LoginStep
+from SeleniumBot.step_movepage_facebook import MovePageToPostToolStep
+from SeleniumBot.step_util import StepList
 
 
 
@@ -49,6 +47,7 @@ class IgAction(object):
             print(f'OK: Success! event_name:{event_name}, content len: {len(content)}')
             driver.implicitly_wait(15)
             driver.quit()
+            return True
         #print(len(main_content_of_the_pos),main_content_of_the_pos)
         main_pic_path = event_information.get('img_link')
         main_link = event_information.get('link')
@@ -66,8 +65,8 @@ class IgAction(object):
         }
         content, img_name = main_content, f"{JPGDIR}{event_name}.jpg"
         #print(f"content:{content}, \nimg_name:{img_name}")
-        ig_push(content=content, img_name=img_name)
-        self.db.insert_by_key(key=event_name, value=ig_post_obj)
+        if ig_push(content=content, img_name=img_name):
+            self.db.insert_by_key(key=event_name, value=ig_post_obj)
         return ig_post_obj
 
     def new_multi_posts(self, events_name: list, events_information: list) -> list:

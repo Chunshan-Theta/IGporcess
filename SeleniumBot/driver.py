@@ -30,7 +30,7 @@ class ChromeDriver(object):
             self.driver = webdriver.Chrome(options=options)
         else:
             print("INFO: using local driver Chrome")
-            self.driver = webdriver.Chrome(options=options, executable_path=f'{os.getcwd()}/selenium_bot/chromedriver_mac')
+            self.driver = webdriver.Chrome(options=options, executable_path=f'{os.getcwd()}/SeleniumBot/chromedriver_mac')
     def init_driver(self):
         return self.driver
 

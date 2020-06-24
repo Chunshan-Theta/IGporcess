@@ -5,7 +5,7 @@ import requests as rq
 from bs4 import BeautifulSoup
 from ImageWin.util.config import LOGDIR
 from ImageWin.util.event_obj import event
-from ImageWin.util.task.task_manager import Task
+from TaskManger.task_manager import Task
 
 
 class CrawlerTask(Task):

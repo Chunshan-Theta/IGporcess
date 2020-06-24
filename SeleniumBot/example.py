@@ -13,11 +13,11 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
 
-from selenium_bot.driver import FirefoxyDriver, ChromeDriver
-from selenium_bot.step_create_post_in_posttool_facebook import NewPostInPostToolStep
-from selenium_bot.step_login_facebook import LoginStep
-from selenium_bot.step_movepage_facebook import MovePageToPostToolStep
-from selenium_bot.step_util import StepList
+from SeleniumBot.driver import FirefoxyDriver, ChromeDriver
+from SeleniumBot.step_create_post_in_posttool_facebook import NewPostInPostToolStep
+from SeleniumBot.step_login_facebook import LoginStep
+from SeleniumBot.step_movepage_facebook import MovePageToPostToolStep
+from SeleniumBot.step_util import StepList
 
 
 
