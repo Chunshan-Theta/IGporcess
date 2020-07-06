@@ -34,18 +34,44 @@ class db_core(object):
 
 class db_tiny(db_core):
     def __init__(self,db_save_path=None, db_name = "db_event_information",tabel_name="default"):
+        self._opened = True
         db_save_path = DBDIR if db_save_path is None else db_save_path
         self.db_dir = f"{db_save_path}{db_name}.json"
-        print(f"SAVE: {self.db_dir}")
+        print(f"INIT: {self.db_dir}")
         self.db_file = TinyDB(self.db_dir,ensure_ascii=False)
         self.key_label = "id"
         self.tabel_name = tabel_name
         self.db = self.db_file.table(self.tabel_name)
 
+    def __enter__(self):
+        """
+        Use the database as a context manager.
+
+        Using the database as a context manager ensures that the
+        :meth:`~tinydb.database.TinyDB.close` method is called upon leaving
+        the context.
+
+        :return: The current instance
+        """
+        return self
+
+    def __exit__(self, *args):
+        """
+        Close the storage instance when leaving a context.
+        """
+        if self._opened:
+            self._opened = False
+            self.close()
+
+    #
+    def close(self):
+        self.db_file.close()
 
     def insert_by_key(self, key: str, value: dict):
+
         new_key = self.key_filter(key=key)
         assert self.find_by_key(key=new_key) == [], f"key is exist: {new_key}"
+
         value.update({self.key_label:new_key})
         self.db.insert(value)
 
@@ -55,7 +81,6 @@ class db_tiny(db_core):
             (self.key_label, "==", self.key_filter(key=key))
         ]
         return self.db.search(lambda row: self._basic_cond(row, requirements))
-
 
     def update_by_key(self, key: str, column: str, value):
         update_fields = {
@@ -70,13 +95,13 @@ class db_tiny(db_core):
         ]
         return self.db.update(fields=update_fields, cond=lambda row: self._basic_cond(row, requirements))
 
-
     def delete_by_key(self, key: str):
         requirements = [
             (self.key_label, "==", self.key_filter(key=key))
         ]
 
         return self.db.remove(cond=lambda db: self._basic_cond(db, requirements))
+
     def find_all(self) -> [tuple]:
         return [(row[self.key_label], row) for row in self.db.all()]
 
@@ -86,6 +111,7 @@ class db_tiny(db_core):
     def key_exist(self,key)->bool:
         filtered_key = self.key_filter(key=key)
         return False if self.find_by_key(filtered_key) == [] else True
+
     def _basic_cond(self,row, requirements:[tuple]):
         for column, cond, value in requirements:
             if column not in row:
@@ -120,7 +146,9 @@ class db_tiny(db_core):
                 objs = CrawlerTask.load_result(filename=f"{LOGDIR}{logfile}")
                 for obj in objs:
                     filtered_key = self.key_filter(obj['name'])
-                    if self.find_by_key(filtered_key) == []:
+                    #if self.find_by_key(filtered_key) == []:
+                    if not self.key_exist(filtered_key):
+                        print(f"insert a new post: {filtered_key}")
                         self.insert_by_key(key=filtered_key, value=obj)
             except json.decoder.JSONDecodeError as e:
                 print(f"log file error: {logfile},{e}")
@@ -230,12 +258,15 @@ class DbTaskUpdateLoop(Task):
     def __init__(self, task_type="delay:0.1"):
         super().__init__(task_label="db")
         self.task_type = task_type
-        self.db = db_tiny()
+
 
 
     def task_exe(self):
-        self.db.loading_logfile()
+        with db_tiny() as db:
+            db.loading_logfile()
+            db.close()
 
     def task_exe_and_save_result(self) -> str:
         self.task_exe()
-        return self.db.db_dir
+        with db_tiny() as db:
+            return db.db_dir

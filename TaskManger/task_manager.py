@@ -30,7 +30,8 @@ class TaskManager(object):
 
     def loop_run(self, timedelta = 1):
         while len(self.task_list) > 0 or len(self.delay_task_list) > 0:
-            self.logging.debug(f"run:{self.manager_status()}")
+            self.logging.debug(f"line: {self.manager_status()}")
+            print(f"\r{datetime.datetime.now()} line: {self.manager_status()}",end="")
             self.run()
             time.sleep(timedelta)
 
@@ -44,7 +45,8 @@ class TaskManager(object):
 
                         # add job to taskline
                         self.logging.debug(f"add job:{task_obj.task_label}")
-                        self.task_list.append(task_obj)
+                        task_obj.__init__()
+                        self.add_task(task_obj=task_obj)
 
                         # del job from waited taskline
                         del_index = self.delay_task_list.index((task_obj, runtime))
@@ -69,8 +71,10 @@ class TaskManager(object):
 
             # run the task
             now_task.task_exe_and_save_result() if save2file else now_task.task_exe()
+
             # finished the task
             now_task.stage = "finished"
+            self.logging.info(f"line: {self.manager_status()}")
 
 
         except ValueError as e:
@@ -130,8 +134,8 @@ class TaskManager(object):
         delay_task_list = ""
         for task, nexttimestamp in self.delay_task_list:
             nexttimestamp: datetime.datetime
-            delay_task_list += f"{task.task_label}:{nexttimestamp.strftime('%Y/%m/%d %H:%M:%S')}"
+            delay_task_list += f"{task.task_label}:{nexttimestamp.strftime('%m/%d %H:%M:%S')}"
             delay_task_list += ", "
         delay_task_list = delay_task_list[:-2]
 
-        return f"\"self.task_list\": \"{task_list}\",\"self.delay_task_list\": \"{delay_task_list}\""
+        return f"\"line\": \"{task_list}\",\"delay\": \"{delay_task_list}\""

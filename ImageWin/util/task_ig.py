@@ -17,7 +17,9 @@ from SeleniumBot.step_util import StepList
 
 class IgAction(object):
     def __init__(self):
-        self.db = db_tiny(db_name="ig_action")
+        pass
+        self.db_name = "ig_action"
+        #self.db = db_tiny(db_name="ig_action")
 
     def remove_punctuation(self, line):
         rule = re.compile("[^ a-zA-Z0-9\u4e00-\u9fa5]")
@@ -66,7 +68,8 @@ class IgAction(object):
         content, img_name = main_content, f"{JPGDIR}{event_name}.jpg"
         #print(f"content:{content}, \nimg_name:{img_name}")
         if ig_push(content=content, img_name=img_name):
-            self.db.insert_by_key(key=event_name, value=ig_post_obj)
+            with db_tiny(db_name=self.db_name) as db:
+                db.insert_by_key(key=event_name, value=ig_post_obj)
         return ig_post_obj
 
     def new_multi_posts(self, events_name: list, events_information: list) -> list:
@@ -82,8 +85,16 @@ class IgAction(object):
         return results
 
     def has_posted(self, event_name: str) -> bool:
-        return False if self.db.find_by_key(key=event_name) is None else True
-
+        with db_tiny(db_name=self.db_name) as db:
+            token = False if db.find_by_key(key=event_name) is None else True
+        return token
+    def all(self):
+        with db_tiny(db_name=self.db_name) as db:
+            all_action = db.find_all()
+        return all_action
+    def key_exist(self,key)-> bool:
+        with db_tiny(db_name=self.db_name) as db:
+            return db.key_exist(key=key)
     def _generate_date_tag_by_date(self, event_time_start: datetime, event_time_end: datetime, disabled_daliy_limit=20) -> str:
         #print(event_time_start,event_time_end)
         event_time_start = datetime.now() if datetime.now() > event_time_start else event_time_start
@@ -111,19 +122,22 @@ class IgTaskPush(Task):
         super().__init__(task_label="ig_push")
         self.logging = get_logger(name="TaskIGPush")
         self.task_type = "delay:0.6"
-        self.db_event_information = db_tiny()
-        self.db_ig_action = IgAction().db
+        #self.db_event_information = db_tiny()
+        self.db_ig_action = IgAction()
 
     def task_exe(self, logger_option: bool= False):
-        for event_name, event_information in self.db_event_information.find_all():
-            #print(f"event_name, event_information: {event_name}, {event_information}")
-            if not self.db_ig_action.key_exist(key=event_name) and self._ontime(event_information['time_end']):
-                self.logging.info(f"Post: {event_name}")
+        with db_tiny() as db:
+            all_post = db.find_all()
+            self.logging.info(f"總文章 len: {len(all_post)}")
+            self.logging.info(f"已發 len: {len(self.db_ig_action.all())}")
+            for event_name, event_information in all_post:
+                if not self.db_ig_action.key_exist(key=event_name) and self._ontime(event_information['time_end']):
+                    self.logging.info(f"Post: {event_name}")
 
-                re = IgAction().new_a_post(event_name=event_name, event_information=event_information)
-                if logger_option:
-                    self.logging.debug(f"{re}")
-                break
+                    re = IgAction().new_a_post(event_name=event_name, event_information=event_information)
+                    if logger_option:
+                        self.logging.debug(f"{re}")
+                    break
 
     def task_exe_and_save_result(self, **kwargs):
         self.task_exe(logger_option=True)
