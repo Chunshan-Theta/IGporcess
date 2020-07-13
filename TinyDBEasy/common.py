@@ -19,7 +19,6 @@ class db_core(object):
         return key
     pass
 
-
     def insert_by_key(self, key: str, value: dict):
         raise NotImplementedError
     def find_by_key(self, key: str):
@@ -63,9 +62,16 @@ class db_tiny(db_core):
             self._opened = False
             self.close()
 
-    #
     def close(self):
         self.db_file.close()
+
+    #
+    def insert(self, value: dict, table: str = None):
+        if table is not None:
+            db_table = self.db_file.table(table)
+        else:
+            db_table = self.db
+        db_table.insert(value)
 
     def insert_by_key(self, key: str, value: dict):
 
@@ -73,14 +79,37 @@ class db_tiny(db_core):
         assert self.find_by_key(key=new_key) == [], f"key is exist: {new_key}"
 
         value.update({self.key_label:new_key})
-        self.db.insert(value)
+        self.insert(value=value)
 
+    def find(self, requirements: [tuple]):
+        """
+
+        :param requirements:
+        requirements=[
+            (field_name, "==", want_field_name)
+        ]
+        :return:
+        """
+        return self.db.search(lambda row: self._basic_cond(row, requirements))
 
     def find_by_key(self, key: str):
         requirements=[
             (self.key_label, "==", self.key_filter(key=key))
         ]
-        return self.db.search(lambda row: self._basic_cond(row, requirements))
+        return self.find(requirements=requirements)
+
+    def update(self, update_fields: dict, requirements: [tuple]):
+        """
+
+        :param update_fields:
+            {
+                "want_updated_field1": "New Value 1",
+                "want_updated_field2": "New Value 2",
+            }
+        :param requirements:
+        :return:
+        """
+        return self.db.update(fields=update_fields, cond=lambda row: self._basic_cond(row, requirements))
 
     def update_by_key(self, key: str, column: str, value):
         update_fields = {
@@ -93,26 +122,30 @@ class db_tiny(db_core):
         requirements = [
             (self.key_label, "==", self.key_filter(key=new_key))
         ]
-        return self.db.update(fields=update_fields, cond=lambda row: self._basic_cond(row, requirements))
+        return self.update(update_fields=update_fields, requirements=requirements)
+
+    def delete(self, requirements: [tuple]):
+        return self.db.remove(cond=lambda db: self._basic_cond(db, requirements))
 
     def delete_by_key(self, key: str):
         requirements = [
             (self.key_label, "==", self.key_filter(key=key))
         ]
+        return self.delete(requirements=requirements)
 
-        return self.db.remove(cond=lambda db: self._basic_cond(db, requirements))
-
+    #
     def find_all(self) -> [tuple]:
         return [(row[self.key_label], row) for row in self.db.all()]
 
     def drop_all(self):
         self.db_file.drop_table(name=self.tabel_name)
 
-    def key_exist(self,key)->bool:
+    def key_exist(self, key) -> bool:
         filtered_key = self.key_filter(key=key)
         return False if self.find_by_key(filtered_key) == [] else True
 
-    def _basic_cond(self,row, requirements:[tuple]):
+    #
+    def _basic_cond(self, row, requirements: [tuple]):
         for column, cond, value in requirements:
             if column not in row:
                 return False
@@ -135,7 +168,7 @@ class db_tiny(db_core):
                     return False
         return True
 
-
+    #
     def loading_logfile(self):
         logfiles = os.listdir(f"{LOGDIR}")
         logfiles = [path for path in logfiles if path.endswith("json")]
@@ -152,6 +185,8 @@ class db_tiny(db_core):
                         self.insert_by_key(key=filtered_key, value=obj)
             except json.decoder.JSONDecodeError as e:
                 print(f"log file error: {logfile},{e}")
+
+
 class db(db_core):
     def __init__(self,db_save_path=None, db_name = "db_event_information"):
         db_save_path = DBDIR if db_save_path is None else db_save_path
