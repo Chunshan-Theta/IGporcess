@@ -2,6 +2,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
 
+from SeleniumBot.auth import fans_group_name
 from SeleniumBot.step_util import Step, DriverStep
 
 
@@ -12,7 +13,7 @@ class MovePageToPostToolStep(DriverStep):
 
     def run(self) -> bool:
         try:
-            self.click_button_by_label(label='平行城市')
+            self.click_button_by_label(label=fans_group_name)
             self.driver.implicitly_wait(10)
 
             self.assert_label_element_exist(label="發佈工具")

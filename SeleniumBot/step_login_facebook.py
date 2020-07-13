@@ -2,8 +2,8 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
 
-from auth import username, password
-from SeleniumBot.step_util import Step, DriverStep
+from SeleniumBot.auth import username, password, fans_group_name
+from SeleniumBot.step_util import DriverStep
 
 
 class LoginStep(DriverStep):
@@ -28,7 +28,7 @@ class LoginStep(DriverStep):
             self.driver.implicitly_wait(30)
 
             self.assert_label_element_exist(label="建立貼文")
-            self.assert_label_element_exist(label="平行城市")
+            self.assert_label_element_exist(label=fans_group_name)
             self.status = True
             return self.status
         except Exception as e:

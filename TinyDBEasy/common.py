@@ -37,7 +37,7 @@ class db_tiny(db_core):
         self._opened = True
         db_save_path = DBDIR if db_save_path is None else db_save_path
         self.db_dir = f"{db_save_path}{db_name}.json"
-        print(f"INIT: {self.db_dir}")
+        #print(f"INIT: {self.db_dir}")
         self.db_file = TinyDB(self.db_dir,ensure_ascii=False)
         self.key_label = "id"
         self.tabel_name = tabel_name

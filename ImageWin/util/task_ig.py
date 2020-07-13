@@ -38,8 +38,7 @@ class IgAction(object):
             driver.implicitly_wait(10)
             steps = StepList()
 
-            steps.extend(
-                [LoginStep(driver=driver), MovePageToPostToolStep(driver=driver)])
+            steps.extend([LoginStep(driver=driver), MovePageToPostToolStep(driver=driver)])
             steps.append(NewPostInPostToolStep(driver=driver, content=content, img_name=img_name))
             print(steps)
             steps.run_over()
