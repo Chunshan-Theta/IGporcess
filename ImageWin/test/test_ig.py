@@ -1,5 +1,5 @@
-from TaskManger import TaskManager
-from ImageWin.util.task_ig import IgTaskPush
+from ImageWin.util.task_ig import IgTaskPush, IgTaskPushLastDay
+from TaskManger.task_manager import TaskManager
 
 manager = TaskManager()
 manager.add_task(task_obj=IgTaskPush())

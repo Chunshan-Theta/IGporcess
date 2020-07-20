@@ -36,8 +36,7 @@ class db_tiny(db_core):
         self._opened = True
         db_save_path = DBDIR if db_save_path is None else db_save_path
         self.db_dir = f"{db_save_path}{db_name}.json"
-        #print(f"INIT: {self.db_dir}")
-        self.db_file = TinyDB(self.db_dir,ensure_ascii=False)
+        self.db_file = TinyDB(self.db_dir, ensure_ascii=False)
         self.key_label = "id"
         self.tabel_name = tabel_name
         self.db = self.db_file.table(self.tabel_name)
@@ -168,7 +167,7 @@ class db_tiny(db_core):
                     return False
         return True
 
-    #
+    """
     def loading_logfile(self):
         logfiles = os.listdir(f"{LOGDIR}")
         logfiles = [path for path in logfiles if path.endswith("json")]
@@ -185,6 +184,7 @@ class db_tiny(db_core):
                         self.insert_by_key(key=filtered_key, value=obj)
             except json.decoder.JSONDecodeError as e:
                 print(f"log file error: {logfile},{e}")
+    """
 
 
 class db(db_core):
@@ -288,20 +288,32 @@ class db(db_core):
         return [(key, val) for key, val in self.db.items()]
 
 
-
 class DbTaskUpdateLoop(Task):
     def __init__(self, task_type="delay:0.1"):
         super().__init__(task_label="db")
         self.task_type = task_type
 
-
-
     def task_exe(self):
         with db_tiny() as db:
-            db.loading_logfile()
+            self._loading_logfile(db=db)
             db.close()
 
     def task_exe_and_save_result(self) -> str:
         self.task_exe()
         with db_tiny() as db:
             return db.db_dir
+
+    def _loading_logfile(self, db):
+        log_files = os.listdir(f"{LOGDIR}")
+        log_files = [path for path in log_files if path.endswith("json")]
+        log_files.sort()
+        for logfile in log_files:
+            try:
+                objs = CrawlerTask.load_result(filename=f"{LOGDIR}{logfile}")
+                for obj in objs:
+                    filtered_key = db.key_filter(obj['name'])
+                    if not db.key_exist(filtered_key):
+                        print(f"insert a new post: {filtered_key}")
+                        db.insert_by_key(key=filtered_key, value=obj)
+            except json.decoder.JSONDecodeError as e:
+                print(f"log file error: {logfile},{e}")

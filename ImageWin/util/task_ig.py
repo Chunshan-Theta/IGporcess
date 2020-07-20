@@ -19,7 +19,7 @@ class IgAction(object):
     def __init__(self):
         pass
         self.db_name = "ig_action"
-        #self.db = db_tiny(db_name="ig_action")
+        self.attachment_label = "#新活動"
 
     def remove_punctuation(self, line):
         rule = re.compile("[^ a-zA-Z0-9\u4e00-\u9fa5]")
@@ -49,14 +49,13 @@ class IgAction(object):
             driver.implicitly_wait(15)
             driver.quit()
             return True
-        #print(len(main_content_of_the_pos),main_content_of_the_pos)
         main_pic_path = event_information.get('img_link')
         main_link = event_information.get('link')
         event_name_tags_split_by_space = str(" ".join([f"#{i}" for i in self.remove_punctuation(event_name).split()]))
         main_tags = self._generate_date_tag_by_date(
             event_time_start=datetime.strptime(event_information.get('time_start'), "%Y/%m/%d"),
             event_time_end=datetime.strptime(event_information.get('time_end'), "%Y/%m/%d"))
-        main_content = f"{event_name} \n {main_link} \n #出遊 #假日 #文青 #活動 #展覽 {event_name_tags_split_by_space} {main_tags}"
+        main_content = f"{event_name} \n {main_link} \n {self.attachment_label} \n #出遊 #假日 #文青 #活動 #展覽 {event_name_tags_split_by_space} {main_tags}"
         assert len(main_content) < 700, "IG limit number of the post."
 
         ig_post_obj = {
@@ -65,7 +64,6 @@ class IgAction(object):
             "updated_time": datetime.now().strftime("%Y%m%d_%H%M%S")
         }
         content, img_name = main_content, f"{JPGDIR}{event_name}.jpg"
-        #print(f"content:{content}, \nimg_name:{img_name}")
         if ig_push(content=content, img_name=img_name):
             with db_tiny(db_name=self.db_name) as db:
                 db.insert_by_key(key=event_name, value=ig_post_obj)
@@ -115,6 +113,13 @@ class IgAction(object):
         return return_str
 
 
+class IgActionLastDay(IgAction):
+    def __init__(self):
+        super().__init__()
+        self.db_name = "ig_last_day_db"
+        self.attachment_label = "#最後一日 ❤❤❤"
+
+
 class IgTaskPush(Task):
 
     def __init__(self):
@@ -152,17 +157,37 @@ class IgTaskPush(Task):
             return False
 
 
-class IgTaskLike(Task):
+class IgTaskPushLastDay(Task):
 
     def __init__(self):
-        super().__init__(task_label="ig_like")
-        self.task_type = "delay:2"
+        super().__init__(task_label="ig_push_last_day")
+        self.logging = get_logger(name="TaskIGPushLastDay")
+        self.task_type = "delay:0.3"
+        self.db_ig_action = IgActionLastDay()
 
-    def task_exe(self, **kwargs):
-        raise NotImplementedError
+    def task_exe(self, logger_option: bool= False):
+        with db_tiny() as db:
+            all_post = db.find_all()
+            self.logging.info(f"總活動 len: {len(all_post)}")
+            self.logging.info(f"已發 len: {len(self.db_ig_action.all())}")
+            for event_name, event_information in all_post:
+                if not self.db_ig_action.key_exist(key=event_name) and datetime.strptime(event_information['time_end'], "%Y/%m/%d") == datetime.today():
+                    self.logging.info(f"Post: {event_name}")
+
+                    re = IgAction().new_a_post(event_name=event_name, event_information=event_information)
+                    if logger_option:
+                        self.logging.debug(f"{re}")
+                    break
 
     def task_exe_and_save_result(self, **kwargs):
-        raise NotImplementedError
+        self.task_exe(logger_option=True)
 
     def load_result(self, **kwargs):
         raise NotImplementedError
+
+    def _ontime(self,end_day)->bool:
+        end_day = datetime.strptime(end_day, "%Y/%m/%d")
+        if datetime.today() <= end_day:
+            return True
+        else:
+            return False
