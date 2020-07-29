@@ -3,7 +3,7 @@ import time
 from datetime import datetime, timedelta
 
 from TinyDBEasy.common import db_tiny
-from TaskManger.task_manager import Task
+from TaskManger.task_manager import Task, TaskManager
 from ImageWin.util.logging_defined import get_logger
 from ImageWin.util.config import JPGDIR
 
@@ -111,10 +111,7 @@ class IgAction(object):
         return_str = "".join(return_str)
         #print(return_str)
         return return_str
-manager = TaskManager()
-manager.add_task(task_obj=IgTaskPush())
 
-manager.loop_run()
 
 class IgActionLastDay(IgAction):
     def __init__(self):
