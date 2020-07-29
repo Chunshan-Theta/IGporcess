@@ -8,6 +8,8 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
 from SeleniumBot.step_create_post_in_posttool_facebook import NewPostInPostToolStep
+from SeleniumBot.step_login_facebook import LoginStep
+from SeleniumBot.step_movepage_facebook import MovePageToPostToolStep
 
 
 class TestTemplate(unittest.TestCase):
@@ -17,7 +19,7 @@ class TestTemplate(unittest.TestCase):
         """Start web driver"""
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless')
+        #chrome_options.add_argument('--headless')
         chrome_options.add_argument('--disable-gpu')
         self.driver = webdriver.Chrome(options=chrome_options, executable_path='/Users/gavinwang/selenium_porcess/SeleniumBot/chromedriver_mac')
         self.driver.implicitly_wait(10)
@@ -27,22 +29,10 @@ class TestTemplate(unittest.TestCase):
         self.driver.quit()
 
     def test_case_1(self):
-        """Find and click top-right button"""
-        try:
-            self.driver.get('https://www.oursky.com/')
-            el = self.driver.find_element_by_class_name('btn-header')
-            el.click()
-        except NoSuchElementException as ex:
-            self.fail(ex.msg)
+        LoginStep(self.driver).run()
+        MovePageToPostToolStep(self.driver).run()
+        NewPostInPostToolStep(self.driver).run()
 
-    def test_case_2(self):
-        """Find and click Learn more button"""
-        try:
-            self.driver.get('https://www.oursky.com/')
-            el = self.driver.find_element_by_xpath(".//*[@id='tag-line-wrap']/span/a")
-            el.click()
-        except NoSuchElementException as ex:
-            self.fail(ex.msg)
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestTemplate)
     unittest.TextTestRunner(verbosity=2).run(suite)

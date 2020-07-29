@@ -18,7 +18,7 @@ class patch_post(dict):
 
 class NewPostInPostToolStep(DriverStep):
 
-    def __init__(self, driver: WebDriver, content:str = "我最愛的工作機ＱＱ", img_name:str="sample.jpg"):
+    def __init__(self, driver: WebDriver, content:str = "我最愛的工作機ＱＱ", img_name:str="/Users/gavinwang/selenium_porcess/SeleniumBot/img/sample.jpg"):
         super().__init__(driver=driver)
         self.content = content
         self.img_name = img_name
@@ -35,8 +35,8 @@ class NewPostInPostToolStep(DriverStep):
 
 
 
-            self.click_button_by_label(label='相片／影片')
-            self.driver.implicitly_wait(10)
+            #self.click_button_by_label(label='新增相片')
+            #self.driver.implicitly_wait(10)
 
             """
             ##<input accept="video/*,  video/x-m4v, video/webm, video/x-ms-wmv, video/x-msvideo, video/3gpp, video/flv, video/x-flv, video/mp4, video/quicktime, video/mpeg, video/ogv, .ts, .mkv, image/*, image/heic, image/heif" multiple="" name="composer_photo" display="inline-block" type="file" class="_n _5f0v" id="js_1y">
@@ -45,19 +45,19 @@ class NewPostInPostToolStep(DriverStep):
 
             #self.driver.find_element_by_name("composer_photo").send_keys(os.getcwd() + f"/selenium_bot/img/{init_post_patch.get_img_name()}")
             print(init_post_patch.get_img_name())
-            self.driver.find_element_by_name("composer_photo").send_keys(f"{init_post_patch.get_img_name()}")
+            self.driver.find_element_by_name("business_composer_photo_uploader").send_keys(f"{init_post_patch.get_img_name()}")
             time.sleep(10)
 
             self.assert_label_element_exist(label="接收訊息")
-            field = self.driver.find_element_by_xpath(f"//*[contains(@aria-label, \"介紹一下\")]")
+            field = self.driver.find_element_by_xpath(f"//*[contains(@aria-label, \"寫點內容\")]")
             field.click()
             field.send_keys(init_post_patch.get_content())
             self.driver.implicitly_wait(10)
 
-            self.click_button_by_label(label='貼文將會顯示在 Instagram')
+            self.click_button_by_label(label='Instagram 動態消息')
             self.driver.implicitly_wait(10)
 
-            self.click_button_by_label(label='立即分享', element_type="span")
+            self.click_button_by_label(label='發佈', element_type="div")
             self.driver.implicitly_wait(10)
 
             self.status = True
