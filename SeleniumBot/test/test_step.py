@@ -22,6 +22,7 @@ class TestTemplate(unittest.TestCase):
         #chrome_options.add_argument('--headless')
         chrome_options.add_argument('--disable-gpu')
         self.driver = webdriver.Chrome(options=chrome_options, executable_path='/Users/gavinwang/selenium_porcess/SeleniumBot/chromedriver_mac')
+
         self.driver.implicitly_wait(10)
 
     def tearDown(self):
@@ -32,8 +33,20 @@ class TestTemplate(unittest.TestCase):
         LoginStep(self.driver).run()
         MovePageToPostToolStep(self.driver).run()
         NewPostInPostToolStep(self.driver).run()
+    def test_case_2(self):
+        latitude, longitude = 23.008332, 120.202711
+        self.driver.execute_cdp_cmd("Page.setGeolocationOverride", {
+            "latitude": latitude,
+            "longitude": longitude,
+            "accuracy": 98
+        })
+
+        LoginStep(self.driver).run()
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestTemplate)
     unittest.TextTestRunner(verbosity=2).run(suite)
+
+
+
 
