@@ -1,5 +1,5 @@
 selenium == 3.141.0
 beautifulsoup4==4.7.1
-requests==2.22.0
+requests==2.31.0
 Pillow
 tinydb
